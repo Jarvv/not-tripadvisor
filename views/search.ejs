@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include partials/header %>
+    <script src="/js/sockets/search.js"></script>
+  </head>
+  <body>
+    <% include partials/nav %>
+    <div class="container">
+      <script> var userLocationGlobal; var currentPage = <%=currentPage%>; var totalPages=<%=totalPages%>;</script>
+      <% if (locPermission == false) { %>
+        <script> userLocationGlobal = [<%= userLoc.lat %>,<%= userLoc.lng %>];</script> 
+        <div class="row">
+          <div class="col-sm-12">
+            <br>
+            <div class="alert alert-info" role="alert">
+              To experience Not-TripAdvisor at it's best, we need access to your location. With location, you can use Dynamic Searching, and radius scoping!
+            </div>
+          </div>
+        </div>
+      <% } %> 
+      <div class="connection"></div>
+      <div class="row"> 
+        <div class="col-sm-12">
+            <h1 class="mt-4"><%= title %></h1>
+        </div>
+      </div>
+
+      <div class="row mx-12 my-12">
+        <div class="col-md-12">
+            <h3>By Map</h3>
+            <div id="map"></div>
+
+        </div>
+        <div class="col-md-12 my-5">            
+            <div class="row results-section">
+              <div class="col-md-3">
+                <div class="mobile-inline">
+                  <h3>Filter</h3>
+                  <nav class="navbar">
+                    <button class="navbar-toggler filter-dropdown" id="filter-dropdown" type="button" data-toggle="collapse" data-target="#filter" aria-controls="filter" aria-expanded="false" aria-label="Toggle navigation">
+                      <i class="chevron-change fa fa-chevron-down"></i>
+                    </button>
+                  </nav>
+                </div>
+                <div class="collapse" id="filter"> 
+                  <div class="card">
+                  <div class="card-body">
+                    <form id="filter-form">
+                      <% if (searchToken != "") { %>
+                        <div class="search-token-results">
+                          <div class="search-token">
+                            <span><%= searchToken %></span>
+                            <div class="remove" onclick="removeSearchToken()"><i class="fas fa-times-circle"></i>
+
+                            </div>
+                          </div>
+                        </div>
+                      <br class="searchTokenBR"> 
+                      <% } %>
+
+                      <% if (userLoc != "unset") { %>
+                        <h6 class="card-subtitle mb-2 text-muted">Radius</h6>
+                        <div class="custom-control custom-checkbox radius">
+                          <input type="checkbox" class="custom-control-input" name="radiusEnable" id="radiusEnable">
+                          <label class="custom-control-label" for="radiusEnable">Enable</label>
+                        </div>
+                        
+                        <div class="slidecontainer custom-slider">
+                          <input id="slider-radius" data-slider-id='slider-radius' type="text" data-slider-min="1" data-slider-max="20" data-slider-step="1" data-slider-value="2" name="slider-radius"/>
+                          <p id="sliderValue">2 miles</p>
+                        </div>
+                      <% } %>
+
+                      <h6 class="card-subtitle mb-2 text-muted">By Cuisine</h6>
+                      
+                      <% for (var i=0; i < cuisines.length; i++) {%>
+                        <div class="custom-control custom-checkbox">
+                          <input type="checkbox" class="custom-control-input" name="cuisine-<%= cuisines[i] %>" id="cuisine-<%= cuisines[i] %>">
+                          <label class="custom-control-label" for="cuisine-<%= cuisines[i] %>"><%= cuisines[i] %></label>
+                        </div>
+                      <% } %>
+
+                      <br>  
+
+                      <h6 class="card-subtitle mb-2 text-muted">By Rating</h6>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="ratingStar" id="ratingStar-4" value="4">
+                        <label class="custom-control-label" for="ratingStar-4"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="ratingStar" id="ratingStar-3" value="3">
+                        <label class="custom-control-label" for="ratingStar-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="ratingStar" id="ratingStar-2" value="2">
+                        <label class="custom-control-label" for="ratingStar-2"><i class="fas fa-star"></i><i class="fas fa-star"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="ratingStar" id="ratingStar-1" value="1">
+                        <label class="custom-control-label" for="ratingStar-1"><i class="fas fa-star"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="ratingStar" id="ratingStar-0" value="0" checked="checked">
+                        <label class="custom-control-label" for="ratingStar-0">Any</label>
+                      </div>
+                      <br> 
+                      <h6 class="card-subtitle mb-2 text-muted">By Meal Type</h6>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="meal-breakfast" id="meal-breakfast">
+                        <label class="custom-control-label" for="meal-breakfast">Breakfast</label>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="meal-lunch" id="meal-lunch">
+                        <label class="custom-control-label" for="meal-lunch">Lunch</label>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="meal-dinner" id="meal-dinner">
+                        <label class="custom-control-label" for="meal-dinner">Dinner</label>
+                      </div>
+                      
+                      <br>
+                      <h6 class="card-subtitle mb-2 text-muted">By Price</h6>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="priceRange" id="priceRange-4" value="4">
+                        <label class="custom-control-label" for="priceRange-4"><i class="fas fa-pound-sign"></i><i class="fas fa-pound-sign"></i><i class="fas fa-pound-sign"></i><i class="fas fa-pound-sign"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="priceRange" id="priceRange-3" value="3">
+                        <label class="custom-control-label" for="priceRange-3"><i class="fas fa-pound-sign"></i><i class="fas fa-pound-sign"></i><i class="fas fa-pound-sign"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="priceRange" id="priceRange-2" value="2">
+                        <label class="custom-control-label" for="priceRange-2"><i class="fas fa-pound-sign"></i><i class="fas fa-pound-sign"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="priceRange" id="priceRange-1" value="1">
+                        <label class="custom-control-label" for="priceRange-1"><i class="fas fa-pound-sign"></i> & Up</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" name="priceRange" id="priceRange-0" value="0" checked="checked">
+                        <label class="custom-control-label" for="priceRange-0">Any</label>
+                      </div>
+
+                      <br>
+                      <h6 class="card-subtitle mb-2 text-muted">Accept Reservations?</h6>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="reservationsEnable" id="reservationsEnable">
+                        <label class="custom-control-label" for="reservationsEnable">Enable</label>
+                        <div class="custom-control custom-radio">
+                          <input type="radio" class="custom-control-input" name="reservation" id="reservation-1" value="1">
+                          <label class="custom-control-label" for="reservation-1">Yes</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                          <input type="radio" class="custom-control-input" name="reservation" id="reservation-0" value="0" checked="checked">
+                          <label class="custom-control-label" for="reservation-0">No</label>
+                        </div>
+                      </div>
+
+                      <br>
+                      <h6 class="card-subtitle mb-2 text-muted">Payment Accepted</h6>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="payment-cash" id="payment-cash">
+                        <label class="custom-control-label" for="payment-cash">Cash</label>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="payment-card" id="payment-card">
+                        <label class="custom-control-label" for="payment-card">Card</label>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="payment-online" id="payment-online">
+                        <label class="custom-control-label" for="payment-online">Online Payment</label>
+                      </div>
+
+                      <br>
+                      <h6 class="card-subtitle mb-2 text-muted">Opening/Closing Times</h6>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" name="timesEnable" id="timesEnable">
+                        <label class="custom-control-label" for="timesEnable">Enable</label>
+                      </div>
+                      <div class="slidecontainer custom-slider">
+                        <input id="slider-time" data-slider-id='slider-time' type="text" data-slider-min="0" data-slider-max="2359" data-slider-step="0100" data-slider-value="[0, 2359]" name="slider-time"/>
+                        <div class="sliderTimeVal">00:00 - 23:59</div>
+                      </div>
+                    </form>
+                  </div>
+                  </div>
+                </div>
+              
+              </div>
+              <div class="col-md-9">
+                <h3>Results</h3>
+                
+                <div class="card">
+                  <div class="card-body search-results">
+                    <% if (restaurants.length == 0) { %>
+                      <div class="no-results">Sorry your search returned no results.</div>
+                    <% } %>
+                    <% for(var i=0; i < restaurants.length; i++) { %>
+                      <div class="result row">
+                        <div class="col-md-3">
+                          <div>
+                            <img class="result-image" src="<%= restaurants[i].photo %>"/>
+                          </div>
+                        </div>
+                        <div class="col-md-9">
+                          <div class="result-header">
+                            <h5 class="card-title restaurant-name"><%= restaurants[i].name %></h5>
+                          </div>
+                          <div class="result-stars">
+                            <% while (restaurants[i].rating >= 1) { %>
+                              <i class="fas fa-star"></i>
+                              <% restaurants[i].rating -= 1; %>
+                            <%}%>
+
+                            <% if (restaurants[i].rating > 0) { %>
+                              <i class="fas fa-star-half"></i>
+                            <%}%>
+                            <%= restaurants[i].ratingTotal %> reviews
+
+                          </div>
+
+                          <div class="result-buttons btn-group" role="group" aria-label="Navigation">
+                            <button type="button" class="btn btn-secondary"  onclick="setCenter( [<%= restaurants[i].loc %>])">View on Map</button>
+                            <button type="button" class="btn btn-secondary"><a href="/restaurant/<%= restaurants[i].id %>">View Page <i class="fas fa-chevron-right"></i>
+
+                            </a></button>
+                          </div>
+                          <div class="result-loc-cuis">
+                            <span class="small-text">
+                              <% if (restaurants[i].distance != "") { %>
+                                <span><%= restaurants[i].distance %> miles</span> 
+                                |
+                              <% } %>
+                              <span><%= restaurants[i].typeOfCuisine %></span>
+                              |
+                              <span>
+                              <% for(let j = 0; j < restaurants[i].priceLevel; j++) { %>
+                                <i class="fas fa-pound-sign"></i>
+                              <%}%>
+                              </span>
+                              |
+                              <span>
+                              Reservations?
+                              <% if (restaurants[i].acceptsReservations) { %>
+                                <i class="fas fa-check"></i>
+                              <%} else {%>
+                                <i class="fas fa-times"></i>
+                              <%}%>
+                              </span>
+                              |
+                              <span>
+                              <% for(let j = 0; j < restaurants[i].mealType.length; j++) { %>
+                                <span><%=restaurants[i].mealType[j]%></span>
+                              <%}%>
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+                <br>
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                    <% if (currentPage == 1) { %>
+                      <li class="page-item disabled">
+                    <% } else { %>
+                      <li class="page-item"> 
+                    <% } %>
+                      <a class="page-link" onclick="pagClick(<%= currentPage-1 %>)" aria-label="Previous">
+                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                        <span class="sr-only">Previous</span>
+                      </a>
+                    </li>
+
+                    <% for(let i = 1; i < totalPages+1; i++) { %>
+                      <% if (i == currentPage) { %>
+                      <li class="page-item active"><a class="page-link" onclick="pagClick(<%= i %>)"><%= i %></a></li>
+                      <% } else { %>
+                        <li class="page-item"><a class="page-link" onclick="pagClick(<%= i %>)"><%= i %></a></li>
+                      <% } %>
+                    <% } %>
+                    <% if (currentPage == totalPages) { %>
+                      <li class="page-item disabled">
+                    <% } else { %>
+                      <li class="page-item"> 
+                    <% } %>
+                      <a class="page-link" onclick="pagClick(<%= currentPage+1 %>)" aria-label="Next">
+                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                        <span class="sr-only">Next</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

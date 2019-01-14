@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include partials/header %>
+    <script src="/js/review.js"></script>
+    <script src="/js/sockets/review.js"></script>
+    <script src="/js/photo.js"></script>
+    <script src="/js/sockets/photo.js"></script>
+    <script src="/js/create.js"></script>
+</head>
+<body>
+<% include partials/nav %>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h1 class="mt-4 restaurant-name"><%= restaurant.name %></h1>
+            <span class="restaurant-span-left">
+                <% while (restaurant.rating >= 1) { %>
+                    <i class="fas fa-star"></i>
+                    <% restaurant.rating -= 1; %>
+                <%}%>
+                <% if (restaurant.rating > 0) { %>
+                    <i class="fas fa-star-half"></i>
+                <%}%>
+                <%= reviewNumber %> reviews
+            </span>
+            <span class="restaurant-span-left">
+                <% for(var i=0; i<restaurant.priceLevel; i++) { %>
+                    <i class="fas fa-pound-sign"></i>
+                <%}%>
+            </span>
+            <span class="restaurant-span-left"><%= restaurant.typeOfCuisine %></span>
+            <span class="restaurant-span-right">
+                <% var meals = "";%>
+                <% for(i=0; i < restaurant.mealType.length; i++){ %>
+                    <% meals += " "  + restaurant.mealType[i] %>
+                <%} %>
+                <%= meals %>
+            </span>
+            <br>
+            <span class="restaurant-span-left"><i class="fas fa-map-marker"></i> <%= restaurant.address + ", " + restaurant.postcode %></span>
+            <span class="restaurant-span-left"><i class="fas fa-phone"></i> <%= restaurant.phone %> </span>
+            <span class="restaurant-span-right"><i class="fas fa-laptop"></i> <a href="https://<%= restaurant.website %>"><%= restaurant.website %></a>  </span>
+             <% if (userId === restaurant.userId && loggedIn) { %>
+                <button class="btn btn-primary" style="display: inline; position:relative; top: -9px; margin-left: 10px;"><a class="buttonLink" href="/restaurant/edit/<%= restaurant._id %>">Edit Details</button>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 ">
+            <div class="carousel-container">
+                <div id="carousel" class="carousel" data-interval="false">
+                    <ol class="carousel-indicators">
+                        <% for(var i = 0; i < photos.length; i++) { %>
+                            <li class="indicator-list" data-target="#carousel" data-slide-to="<%= i %>"></li>
+                        <% }%>
+                    </ol>
+                    <div class="carousel-inner">
+                        <% for(var i = 0; i < photos.length; i++) { %>
+                            <div class="carousel-item" style="background-image: url(<%= photos[i].photo %>)">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <% if(photos[i].official){%>
+                                        <div class="slideNumber"> Official: <i class="fa fa-check"></i></div>
+                                    <%}else{ %>
+                                        <div class="slideNumber"><%= photos[i].title %></div>
+                                        <div class="slideNumber"> Photo by: <%= photos[i].firstName %> <%= photos[i].lastName %></div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }%>
+                    </div>
+                    <a class="carousel-control-prev" href="#carousel" onclick="plusSlide(-1, '<%= photoNumber %>', '<%= photos[0].restaurantId %>')" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#carousel" onclick="plusSlide(1, '<%= photoNumber %>', '<%= photos[0].restaurantId %>')" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+                <div class="thumbnail-row">
+                    <% for(var i = 0; i < photos.length; i++) { %>
+                    <div class="column">
+                        <img class="img-thumbnail" src="<%= photos[i].photo %>" onclick='currentSlide(<%= i %>)'>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <h2 class="mt-3">Restaurant Details</h2>
+    <div class="row mx-4 my-4">
+        <div class="col-8">
+            <div class="half-column">
+                <p><b>Cuisine: </b><%= restaurant.typeOfCuisine %></p>
+                <p><b>Price: </b>
+                    <% for(var i=0; i<restaurant.priceLevel; i++) { %>
+                        <i class="fas fa-pound-sign"></i>
+                    <%}%>
+                </p>
+                <p><b>Meal Type: </b>
+                    <%= meals %>
+                </p>
+            </div>
+            <div class="half-column">
+                <p><b>Payments Accepted: </b><%= restaurant.paymentAccepted %></p>
+                <p><b>Opening Hours: </b>
+                    <%= restaurant.openingTime %> - <%= restaurant.closingTime %>
+                </p>
+                <p> <b>Accepts Reservations: </b>
+                    <% if(restaurant.acceptReservations){ %>
+                    <span style="color: red"><i class="fa fa-times"></i></span>
+                    <%}else{%>
+                    <span style="color: green"> <i class="fa fa-check"></i></span>
+                    <%} %>
+                </p>
+            </div>
+            <br>
+            <div>
+                <h5>Location and Contact Information</h5>
+                <p>
+                    <b>Address:</b> <%= restaurant.address + ", " + restaurant.postcode %> <br>
+                    <b>Phone: </b> <%= restaurant.phone %> <br>
+                    <b>Website: </b> <a href="https://<%= restaurant.website %>"><%= restaurant.website %></a>
+                </p>
+            </div>
+        </div>
+        <div class="col-4">
+            <div id="map"></div>
+            <div class="text-center">
+                <button class="btn btn-primary" id="directions" onclick="getDirections(<%= restaurant.location%>)">Get Directions</button>
+            </div>
+
+        </div>
+    </div>
+
+    <% if(otherRestaurants.length > 1){ %>
+        <hr>
+        <h2 class="mt-3">Other <%= restaurant.typeOfCuisine %> Restaurants</h2>
+        <% for(var i = 0; i < otherRestaurants.length; i++){ %>
+            <% if(otherRestaurants[i].name != restaurant.name) { %>
+            <div class="col-3">
+                <a href="/restaurant/<%= otherRestaurants[i].id %>">
+                    <img class="result-image" src="<%= otherRestaurants[i].photos[0] %>">
+                    <h4><%= otherRestaurants[i].name %></h4>
+                </a>
+                <% while (otherRestaurants[i].rating >= 1) { %>
+                    <i class="fas fa-star"></i>
+                    <% otherRestaurants[i].rating -= 1; %>
+                <%}%>
+                    <% if (otherRestaurants[i].rating > 0) { %>
+                    <i class="fas fa-star-half"></i>
+                <%}%>
+            </div>
+            <% } %>
+        <% } %>
+    <% } %>
+
+    <hr>
+    <h2 class="mt-3">Reviews (<%= reviewNumber %>)</h2>
+    <div class="col-md-9">
+        <% if(reviews.length == 0){ %>
+         <h3> Be the first to write a review!</h3>
+        <%} else{%>
+            <div class="card-body search-results">
+                <% for(var i = 0; i < reviews.length; i++) { %>
+                <div class="result row">
+                    <div class="row mx-4 my-4">
+                        <div class="media">
+                            <div class="media-body">
+                                <h4 class="media-heading"><%= reviews[i].title %></h4>
+                                <p class="text-right">By <%= reviews[i].firstName%>  <%= reviews[i].lastName %></p>
+                                <p><%= reviews[i].review %></p>
+                                <% for(var j = 0; j < reviews[i].rating; j++){ %>
+                                <i class="fas fa-star"></i>
+                                <% } %>
+                                <small><i class="text-left">Posted on <%= reviews[i].date %></i></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+            <br>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link" onclick="reviewButton('prev', '<%= restaurant.id %>', <%= reviewNumber %>)" aria-label="Previous">
+                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                        <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+                    <% for(let i = 1; i < Math.ceil(reviewNumber / 5)+1; i++) { %>
+                        <li class="page-item"><a class="page-link" onclick="reviewButton(<%= i %>, '<%= restaurant.id %>', <%= reviewNumber %>)"><%= i %></a></li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" onclick="reviewButton('next', '<%= restaurant.id %>', <%= reviewNumber %>)" aria-label="Next">
+                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                        <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        <% } %>
+    </div>
+    <hr>
+    <div id="reviewDiv">
+        <% if (!loggedIn) { %>
+            <h3>Please <a href="#"  data-toggle="modal" data-target="#login-modal">Login</a> to write a review! </h3>
+        <% } else { %>
+            <% if(userId === restaurant.userId){ %>
+                <div class="row mx-1">
+                    <button class="btn btn-primary float-right disabled" data-toggle="collapse" data-target="#collapse">Write A Review
+                    </button>
+                </div>
+            <%}%>
+            <% if(userReview.title == ""){ %>
+                <div class="row mx-1">
+                    <button class="btn btn-primary float-right" data-toggle="collapse" data-target="#collapse">Write A Review
+                    </button>
+                </div>
+                <div class="col-md-9 card p-3 collapse" id="collapse">
+                    <form id="reviewForm" method="post" enctype="multipart/form-data">
+                        <% } else { %>
+                        <div class="row mx-1">
+                            <button class="btn btn-primary float-right" data-toggle="collapse" data-target="#collapse">Update Your
+                                Review
+                            </button>
+                        </div>
+                        <div class="col-md-9 card p-3 collapse" id="collapse">
+                            <form method="POST" action="../review/update">
+                                <input type="hidden" name="reviewId" value="<%= userReview._id %>">
+                                <input type="hidden" name="oldRating" value="<%= userReview.rating %>">
+                                <% } %>
+                                <input type="hidden" name="restaurantId" id="restaurantId" value="<%= restaurant._id %>">
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <div class="form-group">
+                                            <label for="title">Review Title:</label>
+                                            <input type="text" id="reviewTitle" name="title"
+                                                   placeholder="Enter a title for your review..." required="required" value="<%= userReview.title %>"
+                                                   class="form-control">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="rating">Rating:</label>
+                                            <input type="number" class="form-control" id="reviewRating" required="required" name="rating" min="1" max="5" value="<%= userReview.rating %>"
+                                                   placeholder="Enter a rating (1-5)...">
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="review">Review:</label>
+                                            <textarea class="form-control textarea" rows="3" name="review" id="review" required="required"
+                                                      placeholder="Write your review..."><%= userReview.review %></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <% if(userReview.title == ""){ %>
+                                            <label>Add Photos</label>
+                                            <div class="form-group photos row">
+                                                <label class="col input-group-btn">
+                                                    <button type="button" id="startCamera" class="btn btn-secondary takePhoto">Take Photo <i class="fas fa-camera"></i> </button>
+                                                </label>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mediaCamera">
+                                                    <div class="half-column">
+                                                        <div id="cameraSection" style="display: none;">
+                                                            <h4>Take a photo</h4>
+                                                            <video id="camera">Camera not available</video>
+                                                            <button type="button" class="btn btn-secondary" id="takeCamera" style="margin-top: 5px;">Capture</button>
+                                                            <canvas id="canvas" style="display: none;">
+                                                            </canvas>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="half-column">
+                                                        <h4 class="invisible">Picture</h4>
+                                                        <img id="photo" style="display: none;">
+                                                        <button type="button" class="btn btn-secondary" id="useImage" style="margin-top: 5px; display: none;">Use this image <i class="fas fa-check"></i> </button>
+                                                    </div>
+
+                                                    <input type="file" id="cameraInput" name="camera" style="display:none;">
+                                                    <input type="text" id="cameraFile" name="cameraImage" style="display:none;">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <input style="height: 38px;" id="imagesPlaceholder" placeholder="Images added: None" type="text" class="form-control" readonly>
+                                            </div>
+
+                                        <%}%>
+                                        <div class="form-group">
+                                            <input type="hidden" name="userId" id="userId" value="<%= userId %>">
+                                            <button class="btn btn-primary float-right">Submit</button>
+                                             </form>
+
+                                            <% if(userReview.title != ""){ %>
+                                                <form method="POST" action="../review/delete">
+                                                    <input type="hidden" name="userId" value="<%= userId %>">
+                                                    <input type="hidden" name="reviewId" value="<%= userReview._id %>">
+                                                    <input type="hidden" name="restaurantId" value="<%= restaurant._id %>">
+                                                    <input type="hidden" id="rating" name="rating" value="<%= userReview.rating %>">
+                                                    <button type="submit" class="btn btn-danger float-left">Delete Your Review</button>
+                                                </form>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                        </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

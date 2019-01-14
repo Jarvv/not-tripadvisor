@@ -1,0 +1,7 @@
+Database Setup README
+
+To initially set up the database you need to download mongodb from: https://www.mongodb.com/download-center?_ga=2.195494828.1806870807.1520849598-375644615.1520849598#enterprise 
+
+Then you need to extract, put the bin files onto your path.
+
+Then you can run a mongodb server using command: mongod -dpath=db/

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include partials/header %>
+    <script src="/js/edit.js"></script>
+</head>
+<body>
+<% include partials/nav %>
+
+<div class="container">
+	<form id="edit-form" action="/restaurant/edit/send/" method="POST">
+		<h5 style="margin-top: 10px;">Add a new restaurant</h5>
+		<div class="row">
+			<div class="form-group col-7">
+				<label for="name">Restaurant Name:</label>
+				<input class="form-control" name="name" type="text" id="name" required="true" value="<%= restaurant.name %>">
+				<label for="address">Address:</label>
+				<input class="form-control" name="address" type="text" id="address"  required="true" value="<%= restaurant.address %>">
+				<label for="city">City</label>
+				<input class="form-control" name="city" type="text" id="city"  required="true" value="<%= restaurant.city %>">
+				<label for="postcode">Postcode:</label>
+				<input class="form-control" name="postcode" type="text" id="postcode"  required="true" value="<%= restaurant.postcode %>">
+				<div class="row" style="margin-top: 5px;">
+					<div class="col">
+						<label for="website">Website:</label>
+						<input class="form-control" name="website" type="text" id="website" placeholder="Optional" value="<%= restaurant.website %>">
+					</div>
+					<div class="col">
+						<label for="phone">Phone Number:</label>
+						<input class="form-control" name="phone" type="text" id="phone" placeholder="Optional" value="<%= restaurant.phone %>">
+					</div>
+				</div>
+
+				<div class="form-group" style="margin-top: 10px;">
+					<div class="row">
+						<div class="col checkbox-group required">
+							<label>Type of Cuisine</label>
+							<small id="cuisineTypeHelp" class="text-danger" style="display:none;">You must select at least one cuisine type</small>
+							<% for (var i=0; i < cuisines.length; i++) {%>
+								<div class="form-check">
+				                  	<input type="checkbox" class="form-check-input" name="<%= cuisines[i]['name'] %>" id="<%= cuisines[i]['name'] %>" 
+					                  	<% if (restaurant.typeOfCuisine.includes(String(cuisines[i]['_id']))) { %>
+					                  		checked
+					                  	<% }; %> > 
+				                  	<label class="form-check-label" for="cuisine-<%= cuisines[i]['name'] %>"><%= cuisines[i]['name'] %></label>
+				                  </div>
+			                <% } %>
+			            </div>
+			            <div class="col">
+			            	<label>Add Photos</label>
+
+			            	<small id="photoHelp" class="text-danger" style="display: none;">Please add an official photo</small>
+			            	
+			            	<div class="form-group photos row">
+
+				                <label class="col input-group-btn">
+				                    <span class="btn btn-primary">
+				                        Browse&hellip; <input id="photosInput" name="photos" type="file" style="display: none;" multiple>
+				                    </span>
+				                </label>
+
+				                <div class="camera col">
+				            		<button type="button" id="startCamera" class="btn btn-primary takePhoto">Take Photo</button>
+				            	</div>
+				            	
+
+				                <input style="height: 38px; margin-top: 10px;" id="imagesPlaceholder" placeholder="Images added: None" type="text" class="form-control" readonly>
+				            </div>
+			            </div>
+		            </div>
+				</div>
+				<div class="form-group" style="margin-top: 10px;">
+					<div class="row">
+						<div class="col">
+							<label>Meal Type</label>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" name="breakfast" <% if (restaurant.mealType.includes('breakfast')) { %>
+					                  		checked
+					                  	<% }; %> >
+								<label class="form-check-label" for="breakfast">Breakfast</label>
+							</div>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" name="lunch" <% if (restaurant.mealType.includes('lunch')) { %>
+					                  		checked
+					                  	<% }; %>>
+								<label class="form-check-label" for="lunch">Lunch</label>
+							</div>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" name="dinner" <% if (restaurant.mealType.includes('dinner')) { %>
+					                  		checked
+					                  	<% }; %>>
+								<label class="form-check-label" for="dinner">Dinner</label>
+							</div>
+			            </div>
+			            <div class="col">
+			            	<label for="priceLevel">Select a price level:</label>
+			            	<select class="form-control" id="priceLevel" name="priceLevel">
+			            		<option  <% if (restaurant.priceLevel == 1) { %>
+					                  		selected
+					                  	<% }; %>value="1">$ (5-10 per person)</option>
+			            		<option <% if (restaurant.priceLevel == 2) { %>
+					                  		selected
+					                  	<% }; %>value="2">$$ (10-20 per person)</option>
+			            		<option <% if (restaurant.priceLevel == 3) { %>
+					                  		selected
+					                  	<% }; %>value="3">$$$ (20-30 per person)</option>
+			            		<option <% if (restaurant.priceLevel == 4) { %>
+					                  		selected
+					                  	<% }; %>value="4">$$$$ (30-50 per person)</option>
+			            		<option <% if (restaurant.priceLevel == 5) { %>
+					                  		selected
+					                  	<% }; %>value="5">$$$$$ (50+ per person)</option>
+			            	</select>
+			            	<div class="form-check" style="margin-top: 10px;">
+			            		<input type="checkbox" class="form-check-input" name="acceptRes" <% if (restaurant.acceptReservations) { %>
+					                  		checked
+					                  	<% }; %>/>
+			            		<label for="acceptRes" class="form-check-label">Accept Reservations?</label>
+			            	</div>
+			            </div>
+			        </div>
+				</div>
+				<div class="form-group" style="margin-top: 10px;">
+					<div class="row">
+						<div class="col">
+							<label>Payment Accepted</label>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" name="cash" <% if (restaurant.paymentAccepted.includes('cash')) { %>
+					                  		checked
+					                  	<% }; %>>
+								<label class="form-check-label" for="cash">Cash</label>
+							</div>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" name="credit" <% if (restaurant.paymentAccepted.includes('credit')) { %>
+					                  		checked
+					                  	<% }; %>>
+								<label class="form-check-label" for="credit">Credit Card</label>
+							</div>
+							<div class="form-check">
+								<input type="checkbox" class="form-check-input" name="online" <% if (restaurant.paymentAccepted.includes('online')) { %>
+					                  		checked
+					                  	<% }; %>>
+								<label class="form-check-label" for="online">Online Payment</label>
+							</div>
+			            </div>
+			            <div class="col">
+			            	<label for="openTime">Opening Time</label>
+			            	<input type="text" name="openTime" class="form-control" value="<%= restaurant.openingTime %>">
+			            	<label for="closingTime">Closing Time</label>
+			            	<input type="text" name="closingTime" class="form-control" value="<%= restaurant.closingTime %>">
+			            </div>
+			        </div>
+				</div>
+				<div style="margin-top: 10px;">
+					<button class="btn btn-primary submitButton" type="submit">Submit</button>
+				</div>
+			</div>
+			<div class="col-4">
+				<div id="cameraSection" style="display: none;">
+					<h4>Take a photo</h4>
+					<video id="camera">Camera not available</video>
+					<button type="button" class="btn btn-primary" id="takeCamera" style="margin-top: 5px;">Capture</button>
+					<button type="button" class="btn btn-primary" id="useImage" style="margin-top: 5px; display: none;">Use this image</button>
+					<canvas id="canvas" style="display: none;">
+		        	</canvas>
+		        	<div class="cameraOutput">
+		        		<img id="photo" style="display: none;">
+		        	</div>
+		        	<input type="file" id="cameraInput" name="camera" style="display:none;">
+		        	<input type="text" id="cameraFile" name="cameraImage" style="display:none;">
+		        </div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<% include partials/footer %>
+</body>

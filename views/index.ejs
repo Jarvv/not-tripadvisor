@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include partials/header %>
+  </head>
+  <body>
+    <% include partials/nav %>
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4">Welcome</h1>
+        <form class="form home" id="navRestaurantSearch" method="POST" action="/search">
+          <div class="searching">
+          <input type="hidden" value="" id="userLoc" name="userLoc">
+          <input class="form-control mr-sm-2" id="navSearchText" type="search" placeholder="Search" aria-label="Search" name="search" autocomplete="off">
+          <div class="searchResults" style="display:none;">
+              <ul>
+              <a href="#"><li>Link<span class="oi oi-chevron-right"></span></li></a>
+              <a href="#"><li>Link 2<span class="oi oi-chevron-right"></span></li></a> 
+              </ul>
+          </div>
+          </div>
+          <div class="home-button">
+            <button class="btn btn-success my-2 my-sm-0" id="navSearch" type="submit">Search</button> 
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="container">
+      <h3 class="home">Most Popular</h3>
+      <div class="row recent-restaurants">
+      <% for(let i = 0; i < mostPopular.length; i++) { %>
+        <div class="col-md-4">
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="<%=mostPopular[i].photo%>">
+            <div class="card-body">
+              <h5 class="card-title"><%=mostPopular[i].name%></h5>
+              <h6 class="card-subtitle mb-2 text-muted"><%=mostPopular[i].typeOfCuisine%></h6>
+              <div class="result-stars">
+                <% while (mostPopular[i].rating >= 1) { %>
+                  <i class="fas fa-star"></i>
+                  <% mostPopular[i].rating -= 1; %>
+                <%}%>
+
+                <% if (mostPopular[i].rating > 0) { %>
+                  <i class="fas fa-star-half"></i>
+                <%}%>
+                <%= mostPopular[i].ratingTotal %> reviews
+
+              </div>
+              <p><%=mostPopular[i].city %>, <%=mostPopular[i].postcode %> </p>
+              <button type="button" class="btn btn-secondary"><a href="/restaurant/<%= mostPopular[i].id %>">View Page <i class="fas fa-chevron-right"></i></a></button>
+            </div>
+          </div>
+          <br>
+        </div>
+      <%}%>
+      </div>
+      <br>
+      <h3 class="home">Recently Added</h3>
+      <div class="row recent-restaurants">
+      <% for(let i = 0; i < recentRestaurants.length; i++) { %>
+        <div class="col-md-4">
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="<%=recentRestaurants[i].photo%>">
+            <div class="card-body">
+              <h5 class="card-title"><%=recentRestaurants[i].name%></h5>
+              <h6 class="card-subtitle mb-2 text-muted"><%=recentRestaurants[i].typeOfCuisine%></h6>
+              <div class="result-stars">
+                <% while (recentRestaurants[i].rating >= 1) { %>
+                  <i class="fas fa-star"></i>
+                  <% recentRestaurants[i].rating -= 1; %>
+                <%}%>
+
+                <% if (recentRestaurants[i].rating > 0) { %>
+                  <i class="fas fa-star-half"></i>
+                <%}%>
+                <%= recentRestaurants[i].ratingTotal %> reviews
+
+              </div>
+              <p><%=recentRestaurants[i].city %>, <%=recentRestaurants[i].postcode %> </p>
+              <button type="button" class="btn btn-secondary"><a href="/restaurant/<%= recentRestaurants[i].id %>">View Page <i class="fas fa-chevron-right"></i></a></button>
+            </div>
+          </div>
+          <br>
+        </div>
+      <%}%>
+      </div>
+    </div>
+  </body>
+</html>

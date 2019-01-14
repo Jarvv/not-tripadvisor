@@ -1,0 +1,99 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
+    <div class="container">
+        <a class="navbar-brand">Not-TripAdvisor</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/search">Restaurants</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/restaurant/createNew">Add Restaurant</a>
+                </li>
+            </ul>
+
+            <div class="offline_div" id="offline_div" style="display: none">
+                <p>Offline</p>
+            </div>
+
+            <form class="form-inline nav-title" id="navRestaurantSearch" method="POST" action="/search">
+                <div class="searching">
+                <input type="hidden" value="" id="userLoc" name="userLoc">
+                <input class="form-control mr-sm-2" id="navSearchText" type="search" placeholder="Search" aria-label="Search" name="search" autocomplete="off">
+                <div class="searchResults" style="display:none;">
+                    <ul>
+                    <a href="#"><li>Link<span class="oi oi-chevron-right"></span></li></a>
+                    <a href="#"><li>Link 2<span class="oi oi-chevron-right"></span></li></a> 
+                    </ul>
+                </div>
+                </div>
+                <button class="btn btn-outline-success my-2 my-sm-0" id="navSearch" type="submit">Search</button>
+            </form>
+            
+            <% if (!loggedIn) { %>
+                <a href="#" class="login-button btn btn-outline-info my-sm-0" role="button" data-toggle="modal" data-target="#login-modal">Login</a>
+            <% } else { %>
+                <a href="/users/logout" class="login-button btn btn-outline-info my-sm-0" role="button">Logout</a>
+            <% } %>
+
+            <div class="modal fade" id="login-modal" tab-index="-1" role="dialog" aria-labelledby="loginModal" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" align="center">
+                            Login
+                        </div>
+                        <form class="container" id="login-form" action="/users" method="POST">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <input class="form-control" type="text" name="email" id="email" placeholder="Email" required="true">
+                                    <input class="form-control" type="password" name="pass" placeholder="Password" required="" style="margin-top: 10px;">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="login-button"> 
+                                    <button class="btn btn-primary" type="submit">Login</button>
+                                </div> 
+                                <div class="register-button">
+                                    <button id="register" type="button" class="btn btn-link">Register</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <form id="register-form" style="display: none;" action="/user" method="POST">
+                        <div class="modal-body">
+                            <span>Register a New Account</span>
+                            <div class="form-group">
+                                <input id="first_Name" name="firstName" class="form-control" type="text" placeholder="First Name" required="true">
+                                <input id="last_name" name="lastName" class="form-control" type="text"
+                                placeholder="Last Name" require="true" style="margin-top: 5px;">
+                                <input id="email" name="email" class="form-control" type="text" placeholder="E-Mail"style="margin-top: 5px;" required>
+                                <input id="password" name="pass" class="form-control" type="password" placeholder="Password" style="margin-top: 5px;" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="reg-button">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </div>
+                            <div class="login-button">
+                                <button id="reg_login_btn" type="button" class="btn btn-link">Log In</button>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+
+    if (window.location.pathname == "/") {
+        $(".nav-title").remove();
+    }
+</script>
